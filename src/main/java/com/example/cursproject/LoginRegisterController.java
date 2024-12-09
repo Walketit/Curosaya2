@@ -2,9 +2,14 @@ package com.example.cursproject;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -17,6 +22,9 @@ public class LoginRegisterController {
 
     private static final String USER_DATABASE_FILE = "users.txt";
 
+    private Stage stage;
+    private Scene scene;
+    private Parent root;
     @FXML
     private Button ToggleButton;
     @FXML
@@ -76,7 +84,7 @@ public class LoginRegisterController {
 
     // Метод для входа
     @FXML
-    private void handleLogin(ActionEvent event) {
+    private void handleLogin(ActionEvent event) throws IOException {
         String login = LoginLogField.getText().trim();
         String password = LogPassField.getText().trim();
         statusMessage.setVisible(true);
@@ -89,6 +97,11 @@ public class LoginRegisterController {
         Map<String, String> users = loadUsers();
         if (users.containsKey(login) && users.get(login).equals(password)) {
             statusMessage.setText("Успешный вход!");
+            Parent root = FXMLLoader.load(getClass().getResource("MainMenu.fxml"));
+            stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
         } else {
             statusMessage.setText("Неверный логин или пароль.");
         }
@@ -119,6 +132,7 @@ public class LoginRegisterController {
         }
 
         if (saveUser(login, password)) {
+            click(event);
             statusMessage.setText("Регистрация успешна! Теперь вы можете войти.");
         } else {
             statusMessage.setText("Ошибка при сохранении пользователя.");
