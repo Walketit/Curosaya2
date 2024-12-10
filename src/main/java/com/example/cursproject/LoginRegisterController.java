@@ -7,16 +7,19 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 public class LoginRegisterController {
 
@@ -26,25 +29,49 @@ public class LoginRegisterController {
     private Scene scene;
     private Parent root;
     @FXML
-    private Button ToggleButton;
+    private ResourceBundle resources;
+
     @FXML
-    private Text LogRegTitle;
+    private URL location;
+
     @FXML
-    private Text TglText;
+    private RadioButton AdminBtn;
+
     @FXML
-    private TextField LoginLogField;
+    private TextField EmailRegField;
+
     @FXML
     private TextField LogPassField;
+
     @FXML
-    private TextField RegLogField;
-    @FXML
-    private TextField RegPassField;
-    @FXML
-    private TextField PswrdConfirmField;
-    @FXML
-    private Button RegisterBtn;
+    private Text LogRegTitle;
+
     @FXML
     private Button LoginLogBtn;
+
+    @FXML
+    private TextField LoginLogField;
+
+    @FXML
+    private TextField PswrdConfirmField;
+
+    @FXML
+    private TextField RegLogField;
+
+    @FXML
+    private TextField RegPassField;
+
+    @FXML
+    private Button RegisterBtn;
+
+    @FXML
+    private Text TglText;
+
+    @FXML
+    private Button ToggleButton;
+
+    @FXML
+    private RadioButton UserBtn;
 
     @FXML
     private Text statusMessage; // Для вывода сообщений об ошибках или успехе
@@ -65,6 +92,9 @@ public class LoginRegisterController {
             RegisterBtn.setVisible(true);
             RegPassField.setVisible(true);
             PswrdConfirmField.setVisible(true);
+            EmailRegField.setVisible(true);
+            UserBtn.setVisible(true);
+            AdminBtn.setVisible(true);
         } else {
             ToggleButton.setText("Регистрация");
             LogRegTitle.setText("Авторизация");
@@ -78,6 +108,9 @@ public class LoginRegisterController {
             RegisterBtn.setVisible(false);
             RegPassField.setVisible(false);
             PswrdConfirmField.setVisible(false);
+            EmailRegField.setVisible(false);
+            UserBtn.setVisible(false);
+            AdminBtn.setVisible(false);
         }
         statusMessage.setText(""); // Очистить сообщение
     }
@@ -97,7 +130,12 @@ public class LoginRegisterController {
         Map<String, String> users = loadUsers();
         if (users.containsKey(login) && users.get(login).equals(password)) {
             statusMessage.setText("Успешный вход!");
-            Parent root = FXMLLoader.load(getClass().getResource("MainMenu.fxml"));
+            // Загрузка второго окна
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("MainMenu.fxml"));
+            Parent root = loader.load();
+            // Получение контроллера второго окна
+            MainMenuController mainMenuController = loader.getController();
+            mainMenuController.setUser(login); // Передача логина
             stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);
@@ -113,6 +151,9 @@ public class LoginRegisterController {
         String login = RegLogField.getText().trim();
         String password = RegPassField.getText().trim();
         String confirmPassword = PswrdConfirmField.getText().trim();
+        String email = EmailRegField.getText().trim();
+        Boolean isAdmin = false;
+        if (AdminBtn.isSelected()) isAdmin = true;
         statusMessage.setVisible(true);
 
         if (login.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
@@ -134,6 +175,7 @@ public class LoginRegisterController {
         if (saveUser(login, password)) {
             click(event);
             statusMessage.setText("Регистрация успешна! Теперь вы можете войти.");
+            User newUser = new User(login, email, isAdmin);
         } else {
             statusMessage.setText("Ошибка при сохранении пользователя.");
         }
