@@ -1,0 +1,36 @@
+/* Стили для контейнера всех счетов */
+.vbox-container {
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-background-color: #ffffff; /* Фон контейнера */
+}
+
+/* Стили для каждого блока счета */
+.account-box {
+    -fx-border-color: black;
+    -fx-border-width: 5;
+    -fx-border-radius: 5; /* Скруглённые углы */
+    -fx-background-color: #f9f9f9;
+    -fx-background-radius: 5; /* Скругление для фона */
+    -fx-padding: 10;
+}
+
+/* Стили для кнопок */
+.button {
+    -fx-background-color: #007bff; /* Синий фон */
+    -fx-text-fill: white; /* Белый текст */
+    -fx-padding: 5 10; /* Внутренние отступы */
+    -fx-border-radius: 3; /* Скругление кнопки */
+    -fx-background-radius: 3;
+    -fx-font-size: 20pt;
+}
+
+.button:hover {
+    -fx-background-color: #0056b3; /* Более тёмный синий при наведении */
+}
+
+/* Стили текста внутри блоков */
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333; /* Тёмный текст */
+}

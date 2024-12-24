@@ -15,7 +15,6 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -138,6 +137,7 @@ public class LoginRegisterController {
             mainMenuController.setUser(login); // Передача логина
             stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
             scene = new Scene(root);
+            scene.getStylesheets().add(0, "src/styles/styles.css");
             stage.setScene(scene);
             stage.show();
         } else {

@@ -2,12 +2,14 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
@@ -29,13 +31,14 @@
                         <Button fx:id="LogsBtn" layoutX="58.0" layoutY="317.0" mnemonicParsing="false" onAction="#openLogs" text="История" />
                         <Button fx:id="SettingsBtn" layoutX="14.0" layoutY="714.0" mnemonicParsing="false" text="Настройки" />
                         <Button fx:id="ExitBtn" layoutX="100.0" layoutY="714.0" mnemonicParsing="false" onAction="#Exit" text="Выход" />
+                        <Button fx:id="saveBtn" layoutX="14.0" layoutY="681.0" mnemonicParsing="false" text="Сохранить" />
                      </children>
                   </AnchorPane>
                </left>
                <center>
                   <AnchorPane fx:id="MainMenu" prefHeight="768.0" prefWidth="1161.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="MainMenuScene" layoutX="373.0" layoutY="199.0" prefHeight="768.0" prefWidth="1080.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="MainMenuScene" layoutX="373.0" layoutY="199.0" prefHeight="768.0" prefWidth="1080.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <Text fx:id="MainGreetings" layoutX="474.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
                            </children>
@@ -59,20 +62,20 @@
                            </children>
                         </AnchorPane>
                         <Line endX="-167.0" endY="-463.0" layoutX="160.0" layoutY="465.0" startX="-167.0" startY="299.0" />
-                        <AnchorPane fx:id="AccountScene" layoutX="341.0" layoutY="230.0" prefHeight="768.0" prefWidth="1081.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane stylesheets="@styles.css" fx:id="AccountScene" layoutX="341.0" layoutY="230.0" prefHeight="768.0" prefWidth="1081.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <Text layoutX="43.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Ваши счета:">
                                  <font>
                                     <Font size="84.0" />
                                  </font>
                               </Text>
-                              <ChoiceBox fx:id="AccountChoose" layoutX="518.0" layoutY="75.0" prefHeight="56.0" prefWidth="551.0" />
-                              <Text fx:id="AccountName" layoutX="445.0" layoutY="239.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
-                              <Text fx:id="AccountBalance" layoutX="445.0" layoutY="351.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
-                              <Button fx:id="MakeTransactionBtn" layoutX="430.0" layoutY="504.0" mnemonicParsing="false" onAction="#updateBalance" text="Button" />
-                              <TextField fx:id="AccountTranscationField" layoutX="382.0" layoutY="463.0" />
-                              <Button fx:id="AccountDeleteBtn" layoutX="441.0" layoutY="678.0" mnemonicParsing="false" text="Button" />
                               <Line endX="858.0" layoutX="247.0" layoutY="208.0" startX="-254.5" />
+                              <Button layoutX="1028.0" layoutY="131.0" mnemonicParsing="false" onAction="#refreshAccounts" text="refresh" />
+                              <ScrollPane layoutX="20.0" layoutY="241.0" prefHeight="400.0" prefWidth="1088.0">
+                                 <content>
+                                    <VBox fx:id="AccountContainer" prefHeight="399.0" prefWidth="1087.0" styleClass="vbox-container" />
+                                 </content>
+                              </ScrollPane>
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="GoalsScene" layoutX="422.0" layoutY="264.0" prefHeight="768.0" prefWidth="1106.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

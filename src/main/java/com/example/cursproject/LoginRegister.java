@@ -1,9 +1,7 @@
 package com.example.cursproject;
 
 import javafx.application.Application;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.*;
 import javafx.stage.Stage;
 
@@ -22,7 +20,6 @@ public class LoginRegister extends Application {
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("LoginRegister.fxml")));
 
         Scene scene = new Scene(root);
-
         primaryStage.setScene(scene);
 
         primaryStage.setTitle("Добро пожаловать в СУФ!");

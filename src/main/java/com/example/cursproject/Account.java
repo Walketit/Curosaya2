@@ -1,6 +1,7 @@
 package com.example.cursproject;
 
 public class Account {
+    private static Account instance;
     private String name; // Название счета
     private String currency; // Валюта счета
     private double balance; // Баланс счета
