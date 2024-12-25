@@ -96,8 +96,8 @@ public class User {
                 name, email, isAdmin ? "Администратор" : "Юзер");
     }
 
-    public void saveAccountsToFile(String filePath) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+    public void saveAccountsToFile() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(name + "Счета.txt"))) {
             for (Account account : accounts) {
                 String line = String.format("%s:%.2f:%s", account.getName(), account.getBalance(), account.getCurrency());
                 bw.write(line.replace(',', '.')); // Заменяем запятую на точку

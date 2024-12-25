@@ -145,6 +145,9 @@ public class MainMenuController {
     private VBox AccountContainer;
 
     @FXML
+    private Button CurrencyRefresh;
+
+    @FXML
     private void Exit(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("LoginRegister.fxml"));
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -179,9 +182,8 @@ public class MainMenuController {
 
         user.setAccounts();
 
-
-
-
+        MainGreetings.setText("Добро пожаловать, " + user.getName() + "!");
+        UserName.setText(user.getName());
     }
 
     @FXML
@@ -222,8 +224,13 @@ public class MainMenuController {
 
 
     // Метод для сохранения обновленных данных счетов в файл
-
-
+    public void saveInfo(ActionEvent e) {
+        user.saveAccountsToFile();
+    }
+    public void refreshCurrency(ActionEvent e) throws IOException {
+        CurrencyChange change = new CurrencyChange();
+        change.setCurrencyChange();
+    }
     public void openProfile(ActionEvent e) {
         MainMenuScene.setVisible(false);
         GoalsScene.setVisible(false);

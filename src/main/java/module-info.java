@@ -9,6 +9,7 @@ module com.example.cursproject {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
+    requires com.google.gson;
 
     opens com.example.cursproject to javafx.fxml;
     exports com.example.cursproject;

@@ -31,7 +31,7 @@
                         <Button fx:id="LogsBtn" layoutX="58.0" layoutY="317.0" mnemonicParsing="false" onAction="#openLogs" text="История" />
                         <Button fx:id="SettingsBtn" layoutX="14.0" layoutY="714.0" mnemonicParsing="false" text="Настройки" />
                         <Button fx:id="ExitBtn" layoutX="100.0" layoutY="714.0" mnemonicParsing="false" onAction="#Exit" text="Выход" />
-                        <Button fx:id="saveBtn" layoutX="14.0" layoutY="681.0" mnemonicParsing="false" text="Сохранить" />
+                        <Button fx:id="saveBtn" layoutX="14.0" layoutY="681.0" mnemonicParsing="false" text="Сохранить" onAction="#saveInfo" />
                      </children>
                   </AnchorPane>
                </left>
@@ -62,7 +62,7 @@
                            </children>
                         </AnchorPane>
                         <Line endX="-167.0" endY="-463.0" layoutX="160.0" layoutY="465.0" startX="-167.0" startY="299.0" />
-                        <AnchorPane stylesheets="@styles.css" fx:id="AccountScene" layoutX="341.0" layoutY="230.0" prefHeight="768.0" prefWidth="1081.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="AccountScene" layoutX="341.0" layoutY="230.0" prefHeight="768.0" prefWidth="1081.0" stylesheets="@styles.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <Text layoutX="43.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Ваши счета:">
                                  <font>
@@ -93,7 +93,7 @@
                               <Button fx:id="GoalDeleteBtn" layoutX="491.0" layoutY="642.0" mnemonicParsing="false" text="Button" />
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="CurrencyChangeScene" layoutX="310.0" layoutY="199.0" prefHeight="765.0" prefWidth="1124.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="CurrencyChangeScene" layoutX="310.0" layoutY="199.0" prefHeight="765.0" prefWidth="1124.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <Text layoutX="309.0" layoutY="105.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Курс валют">
                                  <font>
@@ -105,6 +105,7 @@
                               <ChoiceBox fx:id="CurrencySecondChoice" layoutX="711.0" layoutY="206.0" prefWidth="150.0" />
                               <TextField fx:id="CurrencyAmountIn" layoutX="123.0" layoutY="321.0" />
                               <Text fx:id="CurrencyAmountOut" layoutX="786.0" layoutY="338.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+                              <Button fx:id="CurrencyRefresh" layoutX="913.0" layoutY="101.0" mnemonicParsing="false" onAction="#refreshCurrency" text="Button" />
                            </children>
                         </AnchorPane>
                      </children>
