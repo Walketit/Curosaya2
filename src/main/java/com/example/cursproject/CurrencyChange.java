@@ -24,15 +24,14 @@ public class CurrencyChange {
 
 
     // Метод для установки курса обмена валюты
-    public void setCurrencyChange() throws IOException {
+    public String setCurrencyChange(String base_code, String target_code, double amount) throws IOException {
         // Setting URL
-        String url_str = "https://v6.exchangerate-api.com/v6/5fdc25f18976669688828416/latest/USD";
+        String url_str = "https://v6.exchangerate-api.com/v6/5fdc25f18976669688828416/pair/" + base_code + "/" + target_code;
 
         // Making Request
         URL url = new URL(url_str);
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.connect();
-
         // Convert to JSON
         JsonParser jp = new JsonParser();
         JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
@@ -41,13 +40,11 @@ public class CurrencyChange {
         // Accessing object
         String req_result = jsonobj.get("result").getAsString();
         if (req_result.equals("success")) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter("CurrencyRate.txt"))) {
-                // Accessing object
-                req_result = jsonobj.getAsJsonObject("conversion_rates").get("EUR").getAsString();
-                writer.write("USDEUR:"+ req_result+"\n");
-                req_result = jsonobj.getAsJsonObject("conversion_rates").get("RUB").getAsString();
-                writer.write("USDRUB:"+ req_result);
-            }
+            return String.valueOf((amount * jsonobj.get("conversion_rate").getAsDouble()));
+        }
+        else {
+            System.out.println("Error");
+            return null;
         }
     }
 
