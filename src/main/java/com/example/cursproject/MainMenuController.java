@@ -7,14 +7,17 @@ import java.util.ResourceBundle;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -180,6 +183,26 @@ public class MainMenuController {
     private VBox logsContainer;
 
     @FXML
+    private TextField newAccountName;
+
+    @FXML
+    private TextField newAccountBalance;
+
+    @FXML
+    private ChoiceBox<String> newAccountCurrency;
+
+    @FXML
+    private TextField newGoalName;
+
+    @FXML
+    private TextField newGoalTarget;
+
+    @FXML
+    private TextArea newGoalDescription;
+
+    @FXML
+    private Button newGoalBtn;
+    @FXML
     private void Exit(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("LoginRegister.fxml"));
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -208,14 +231,14 @@ public class MainMenuController {
                 }
             }
         }
-
+        log.setUser(user);
         user.loadAccountsFromFile();
         user.loadGoalsFromFile();
         user.loadNotesFromFile();
         refreshCurrency();
         refreshLogs();
 
-        log.setUser(user);
+
 
         File file = new File(log.getName());
         if (!file.exists()) {
@@ -337,9 +360,32 @@ public class MainMenuController {
         accountWindow.show();
     }
 
+    public void createNewAccount(ActionEvent event) {
+        if (newAccountName.getText().isEmpty() || newAccountCurrency.getValue().isEmpty() ||
+                newAccountBalance.getText().isEmpty()) {
+            showError("Заполните все поля!");
+            return;
+        }
+        for (Account account : user.getAccounts()) {
+            if (account.getName().equals(newAccountName.getText())) {
+                showError("Счёт с таким названием уже существует!");
+                return;
+            }
+        }
+        user.getAccounts().add(new Account(newAccountName.getText(),Double.parseDouble(newAccountBalance.getText()), newAccountCurrency.getValue()));
+        showSuccess("Новый счёт: "+ newAccountName.getText() + " успешно создан!");
+        log.logfileUpdate("Создан Счёт;"+newAccountName.getText()+";"+newAccountBalance.getText()+";");
+        newAccountName.setText("");
+        newAccountBalance.setText("");
+        refreshAccounts();
+    }
+
     @FXML
     public void refreshGoals() {
         GoalsContainer.getChildren().clear();
+        GoalsContainer.setSpacing(240); // Отступы между элементами
+        GoalsContainer.setAlignment(Pos.CENTER_LEFT); // Выравнивание по левому краю
+
         for (Goal goal : user.getGoals()) {
             Pane pane = new Pane();
             double centerX = 100; // Координата центра X
@@ -349,29 +395,117 @@ public class MainMenuController {
             // Создаем окружность (фон)
             Circle circle = new Circle(centerX, centerY, radius);
             circle.setFill(Color.LIGHTGRAY);
+            circle.setStroke(Color.DARKBLUE); // Обводка
+            circle.setStrokeWidth(2);
 
             // Создаем дугу (прогресс)
             Arc progressArc = new Arc(centerX, centerY, radius, radius, 90, 0);
             progressArc.setType(ArcType.ROUND);
             progressArc.setFill(Color.GREEN);
 
+            // Создаем Tooltip для отображения описания цели
+            Tooltip goalTooltip = new Tooltip(goal.getDescription());
+            Tooltip.install(circle, goalTooltip); // Привязываем Tooltip к окружности
+            Tooltip.install(progressArc, goalTooltip); // Привязываем Tooltip к окружности
+
+            // Добавляем обработчик для изменения цвета при наведении
+            circle.setOnMouseEntered(e -> progressArc.setFill(Color.LIGHTGREEN)); // Изменение цвета на зеленый
+            circle.setOnMouseExited(e -> progressArc.setFill(Color.GREEN)); // Возврат к исходному цвету
+            progressArc.setOnMouseEntered(e -> progressArc.setFill(Color.LIGHTGREEN)); // Изменение цвета на зеленый
+            progressArc.setOnMouseExited(e -> progressArc.setFill(Color.GREEN)); // Возврат к исходному цвету
+
             // Рассчитываем угол в зависимости от прогресса
             double progressPercentage = goal.getCurrentBalance() / goal.getTargetAmount();
             progressArc.setLength(-progressPercentage * 360);
 
             // Добавляем текстовое описание цели
-            Text goalText = new Text(centerX - 70, centerY + radius + 20, goal.getTitle() + ": " + (int) (progressPercentage * 100) + "%");
+            Text goalText = new Text(centerX - 70, centerY + radius + 20,
+                    goal.getTitle() + ": " + (int) (progressPercentage * 100) + "%");
             goalText.setFill(Color.BLACK);
 
-            // Добавляем элементы на панель
+            // Устанавливаем размер панели
+            pane.setPrefSize(250, 250); // Фиксированный размер для каждой панели
             pane.getChildren().addAll(circle, progressArc, goalText);
-            pane.setPrefSize(500, 500); // Устанавливаем размер панели для размещения внутри HBox
+
+            // Делаем окружность кликабельной
+            circle.setOnMouseClicked(event -> openGoalWindow(goal));
+            progressArc.setOnMouseClicked(event -> openGoalWindow(goal));
+
+            // Добавляем панель в контейнер
             GoalsContainer.getChildren().add(pane);
         }
         GoalsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS); // Полоса прокрутки всегда
         GoalsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);  // Не показывать вертикальную полосу
         GoalsScrollPane.setPannable(true); // Возможность прокрутки мышью
 
+    }
+
+    private void openGoalWindow(Goal goal) {
+        // Создаем окно для добавления суммы к цели
+        Stage goalWindow = new Stage();
+        goalWindow.initModality(Modality.APPLICATION_MODAL); // делает окно модальным
+        goalWindow.setTitle("Операции с целью: " + goal.getTitle());
+
+        VBox goalLayout = new VBox(10);
+        goalLayout.setPadding(new Insets(20));
+
+        // Метка с текущим балансом и необходимым балансом
+        Label balanceLabel = new Label("Текущий баланс: " + goal.getCurrentBalance() +
+                " / Необходимый баланс: " + goal.getTargetAmount());
+        balanceLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        // Поле для ввода суммы
+        TextField amountField = new TextField();
+        amountField.setPromptText("Введите сумму для добавления к цели");
+
+        // Кнопка для добавления суммы к цели
+        Button addButton = new Button("Добавить к цели");
+        addButton.setOnAction(e -> {
+            try {
+                double amount = Double.parseDouble(amountField.getText());
+                if (amount <= 0) {
+                    throw new NumberFormatException();
+                }
+
+                // Добавляем сумму к прогрессу цели
+                goal.addToBalance(amount);
+                log.logfileUpdate("Добавление к цели;" + goal.getTitle() + ";" + amount + ";");
+                showAlert("Успех", "Сумма успешно добавлена к цели: " + goal.getTitle());
+                goalWindow.close();
+                refreshGoals(); // Обновляем отображение целей
+            } catch (NumberFormatException ex) {
+                showAlert("Ошибка", "Введите правильную сумму для добавления.");
+            }
+        });
+
+        // Добавляем элементы в окно
+        goalLayout.getChildren().addAll(balanceLabel,amountField, addButton);
+
+        // Сцена для окна с операциями
+        Scene goalScene = new Scene(goalLayout, 450, 200);
+        goalWindow.setScene(goalScene);
+        goalWindow.show();
+    }
+
+    @FXML
+    private void createNewGoal(ActionEvent e) {
+        if (newGoalName.getText().isEmpty() || newGoalTarget.getText().isEmpty()) {
+            showError("Заполните все поля!");
+            return;
+        }
+        for (Goal goal : user.getGoals()) {
+            if (goal.getTitle().equals(newGoalName.getText())) {
+                showError("Счёт с таким названием уже существует!");
+                return;
+            }
+        }
+        user.getGoals().add(new Goal(newGoalName.getText(),0.0, Double.parseDouble(newGoalTarget.getText()), newGoalDescription.getText()));
+        showSuccess("Новая цель: "+ newGoalName.getText() + " успешно создана!");
+        log.logfileUpdate("Создана цель;"+newGoalName.getText()+";"+newGoalTarget.getText()+";");
+        newGoalName.setText("");
+        newGoalTarget.setText("");
+        newGoalDescription.setText("");
+        refreshGoals();
     }
 
     @FXML
@@ -393,7 +527,7 @@ public class MainMenuController {
             });
 
             // Добавляем обработчик клика для заметки
-            noteBlock.setOnMouseClicked(event -> handleNoteClick(note));
+            noteBlock.setOnMouseClicked(event -> openNoteWindow(note));
 
             // Добавляем текст и кнопку в HBox
             noteBlock.getChildren().addAll(titleText, contentText, deleteButton);
@@ -404,23 +538,39 @@ public class MainMenuController {
     }
 
     // Обработчик клика на заметку
-    private void handleNoteClick(Note note) {
-        // Например, выводим содержание заметки в консоль
-        System.out.println("Вы кликнули на заметку: " + note.getTitle());
-        System.out.println("Содержание: " + note.getDescription());
+    private void openNoteWindow(Note note) {
+        // Создаем окно для прочтения и/или изменения записки
+        Stage noteWindow = new Stage();
+        noteWindow.initModality(Modality.APPLICATION_MODAL); // делает окно модальным
+        noteWindow.setTitle("Записка: " + note.getTitle());
 
-        // Или можно открыть диалоговое окно для отображения заметки
-        // Например, можно использовать Alert или создать собственное окно
+        VBox noteLayout = new VBox(10);
+        noteLayout.setPadding(new Insets(20));
+
+        TextField noteTitle = new TextField();
+        noteTitle.setText(note.getTitle());
+
+        TextArea noteText = new TextArea();
+        noteText.setText(note.getDescription());
+
+        noteLayout.getChildren().addAll(noteTitle, noteText);
+
+        // Сцена для окна с операциями
+        Scene goalScene = new Scene(noteLayout, 450, 200);
+        noteWindow.setScene(goalScene);
+        noteWindow.show();
     }
 
     public void refreshCurrency() throws IOException {
         CurrencyFirstChoice.getItems().clear();
         CurrencySecondChoice.getItems().clear();
+        newAccountCurrency.getItems().clear();
         try (BufferedReader reader = new BufferedReader(new FileReader("CurrencyCodes.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 CurrencyFirstChoice.getItems().add(line);
                 CurrencySecondChoice.getItems().add(line);
+                newAccountCurrency.getItems().add(line);
             }
         } catch (IOException e) {
             e.printStackTrace();

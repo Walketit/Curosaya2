@@ -15,7 +15,7 @@ public class Goal {
     }
 
     // Конструктор с параметрами
-    public Goal(String name, double targetAmount, double currentAmount, String description) {
+    public Goal(String name, double currentAmount,double targetAmount, String description) {
         this.name = name;
         this.targetAmount = targetAmount;
         this.currentAmount = currentAmount;

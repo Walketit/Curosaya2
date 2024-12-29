@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -78,6 +79,10 @@
                                     <VBox fx:id="AccountContainer" prefHeight="399.0" prefWidth="1087.0" styleClass="vbox-container" />
                                  </content>
                               </ScrollPane>
+                              <TextField fx:id="newAccountName" layoutX="84.0" layoutY="687.0" />
+                              <TextField fx:id="newAccountBalance" layoutX="316.0" layoutY="687.0" />
+                              <ChoiceBox fx:id="newAccountCurrency" layoutX="540.0" layoutY="685.0" prefWidth="150.0" />
+                              <Button fx:id="newAccountBtn" layoutX="769.0" layoutY="676.0" mnemonicParsing="false" onAction="#createNewAccount" text="Button" />
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="GoalsScene" layoutX="422.0" layoutY="264.0" prefHeight="768.0" prefWidth="1106.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -88,11 +93,15 @@
                                  </font>
                               </Text>
                               <Line endX="1109.0" layoutX="14.0" layoutY="126.0" startX="-21.0" />
-                              <ScrollPane fx:id="GoalsScrollPane" layoutX="25.0" layoutY="150.0" prefHeight="377.0" prefWidth="1086.0">
+                              <ScrollPane fx:id="GoalsScrollPane" layoutX="25.0" layoutY="150.0" prefHeight="250.0" prefWidth="1000.0">
                                  <content>
-                                    <HBox fx:id="GoalsContainer" prefHeight="378.0" prefWidth="1086.0" />
+                                    <HBox fx:id="GoalsContainer" prefHeight="250.0" prefWidth="1000.0" styleClass="vbox-container" />
                                  </content>
                               </ScrollPane>
+                              <TextField fx:id="newGoalName" layoutX="56.0" layoutY="522.0" />
+                              <TextField fx:id="newGoalTarget" layoutX="56.0" layoutY="603.0" />
+                              <TextArea fx:id="newGoalDescription" layoutX="261.0" layoutY="522.0" prefHeight="200.0" prefWidth="760.0" />
+                              <Button fx:id="newGoalBtn" layoutX="96.0" layoutY="689.0" mnemonicParsing="false" onAction="#createNewGoal" text="Button" />
                            </children>
                         </AnchorPane>
                         <AnchorPane fx:id="CurrencyChangeScene" layoutX="310.0" layoutY="199.0" prefHeight="765.0" prefWidth="1124.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
