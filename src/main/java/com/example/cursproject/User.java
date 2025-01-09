@@ -16,6 +16,8 @@ public class User {
 
     private List<Note> notes;
 
+    private String userDir;
+
     public User() {
         this.name = "";
         this.email = "";
@@ -24,27 +26,68 @@ public class User {
         this.goals = new ArrayList<>();
         this.notes = new ArrayList<>();
     }
+
     // Конструктор для создания пользователя
     public User(String name, String email, boolean isAdmin) {
         this.name = name;
         this.email = email;
         this.isAdmin = isAdmin;
         this.accounts = new ArrayList<>();
+        this.userDir = name + "dir";
 
-        new File("usersProfiles/" + name);
-        // Создание файла профиля пользователя
-        String filename = "profile" + name + ".txt";
-        try (FileWriter writer = new FileWriter(filename)) {
-            writer.write("Имя:" + name + "\n");
-            writer.write("Почта:" + email + "\n");
-            if (isAdmin) {
-                writer.write("Статус:Админ\n");
+        File folder = new File(userDir);
+
+        // Проверяем, существует ли папка, если нет — создаём
+        if (!folder.exists()) {
+            if (folder.mkdirs()) {
+                System.out.println("Папка успешно создана!");
+
+                // Создаём объект файла внутри нужной папки
+                File userFile = new File(folder, "profile" + name + ".txt");
+                File accountsFile = new File(folder, name+"Счета.txt");
+                File goalsFile = new File(folder, name + "Цели.txt");
+                File notesFile = new File(folder, name + "Заметки.txt");
+                File logFile = new File(folder, name + "Логи.txt");
+
+                try (FileWriter writer = new FileWriter(userFile)) {
+                    writer.write("Имя:" + name + "\n");
+                    writer.write("Почта:" + email + "\n");
+                    if (isAdmin) {
+                        writer.write("Статус:Админ\n");
+                    } else {
+                        writer.write("Статус:Юзер\n");
+                    }
+                    if (accountsFile.createNewFile()) {
+                        System.out.println("Файл успешно создан: " + accountsFile.getAbsolutePath());
+                    } else {
+                        System.out.println("Файл уже существует: " + accountsFile.getAbsolutePath());
+                    }
+                    if (goalsFile.createNewFile()) {
+                        System.out.println("Файл успешно создан: " + goalsFile.getAbsolutePath());
+                    } else {
+                        System.out.println("Файл уже существует: " + goalsFile.getAbsolutePath());
+                    }
+                    if (notesFile.createNewFile()) {
+                        System.out.println("Файл успешно создан: " + notesFile.getAbsolutePath());
+                    } else {
+                        System.out.println("Файл уже существует: " + notesFile.getAbsolutePath());
+                    }
+                    if (logFile.createNewFile()) {
+                        System.out.println("Файл успешно создан: " + logFile.getAbsolutePath());
+                    } else {
+                        System.out.println("Файл уже существует: " + logFile.getAbsolutePath());
+                    }
+                    System.out.println("Файл успешно сохранён: " + userFile.getAbsolutePath());
+                } catch (IOException | RuntimeException e) {
+                    e.printStackTrace();
+                }
+
             } else {
-                writer.write("Статус:Юзер\n");
+                System.out.println("Не удалось создать папку!");
+                return;
             }
-        } catch (IOException | RuntimeException e) {
-            e.printStackTrace();
         }
+
 
     }
 
@@ -53,23 +96,42 @@ public class User {
     public String getName() {
         return name;
     }
-    public String getEmail() {return email;}
 
-    public List<Account> getAccounts() {return accounts;}
+    public String getEmail() {
+        return email;
+    }
 
-    public List<Goal> getGoals() {return goals;}
+    public List<Account> getAccounts() {
+        return accounts;
+    }
 
-    public List<Note> getNotes() {return notes;}
+    public List<Goal> getGoals() {
+        return goals;
+    }
+
+    public List<Note> getNotes() {
+        return notes;
+    }
 
     public boolean isAdmin() {
         if (isAdmin) return true;
         return false;
     }
 
-    public void setName(String name) {this.name = name;};
-    public void setEmail(String email) {this.email = email;}
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setUserDir(String name) {
+        this.userDir = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public void loadAccountsFromFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader(name + "Счета.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(userDir + "/" + name + "Счета.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 // Разделение строки на компоненты
@@ -99,7 +161,7 @@ public class User {
 
     // Класс для чтения целей из файла
     public void loadGoalsFromFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader(name+"Цели.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(userDir + "/" + name +  "Цели.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";"); // Предполагается, что данные разделены ";"
@@ -108,21 +170,21 @@ public class User {
                     double currentAmount = Double.parseDouble(parts[1]);
                     double targetAmount = Double.parseDouble(parts[2]);
                     String description = parts[3];
-                    Goal goal = new Goal(name, targetAmount, currentAmount, description);
+                    Goal goal = new Goal(name, currentAmount, targetAmount, description);
                     goals.add(goal);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for (Goal goal: goals
-             ) {
+        for (Goal goal : goals
+        ) {
             goal.printGoal();
         }
     }
 
     public void loadNotesFromFile() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(name + "Записки.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(userDir + "/" + name +  "Заметки.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Предполагаем, что файл разделен на части: заголовок;содержание;категория
@@ -145,7 +207,7 @@ public class User {
     }
 
     public void saveAccountsToFile() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(name + "Счета.txt"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(userDir + "/" + name + "Счета.txt"))) {
             for (Account account : accounts) {
                 String line = String.format("%s:%.2f:%s", account.getName(), account.getBalance(), account.getCurrency());
                 bw.write(line.replace(',', '.')); // Заменяем запятую на точку
@@ -157,7 +219,7 @@ public class User {
     }
 
     public void saveGoalsToFile() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(name + "Цели.txt"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(userDir + "/" + name +  "Цели.txt"))) {
             for (Goal goal : goals) {
                 String line = String.format("%s;%.2f;%.2f;%s", goal.getTitle(), goal.getCurrentBalance(), goal.getTargetAmount(), goal.getDescription());
                 bw.write(line.replace(',', '.')); // Заменяем запятую на точку
@@ -169,9 +231,10 @@ public class User {
     }
 
     public void saveNotesToFile() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(name + "Записки.txt"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(userDir + "/" + name +  "Заметки.txt"))) {
             for (Note note : notes) {
                 String line = String.format("%s;%s;%s", note.getTitle(), note.getDescription(), note.getCategory());
+                bw.write(line);
                 bw.newLine();
             }
         } catch (IOException e) {
@@ -180,9 +243,13 @@ public class User {
     }
 
     public Account getAccount(String name) {
-        for (Account account: accounts) {
+        for (Account account : accounts) {
             if (account.getName().equals(name)) return account;
         }
         return null;
+    }
+
+    public String getUserDir() {
+        return userDir;
     }
 }

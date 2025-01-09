@@ -18,10 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
@@ -33,7 +30,6 @@ import javafx.util.Duration;
 
 public class MainMenuController {
 
-    private static final String USER_PROFILE_DIRECTORY = "user_profiles/";
     private Stage stage;
     private Scene scene;
     private Parent root;
@@ -201,6 +197,15 @@ public class MainMenuController {
     private TextArea newGoalDescription;
 
     @FXML
+    private TextField newNoteName;
+
+    @FXML
+    private TextArea newNoteDescription;
+
+    @FXML
+    private TextField newNoteCategory;
+
+    @FXML
     private Button newGoalBtn;
     @FXML
     private void Exit(ActionEvent event) throws IOException {
@@ -213,10 +218,9 @@ public class MainMenuController {
 
     // Создание объекта User из файла профиля
     public void setUser(String username) throws IOException {
+        user.setUserDir(username + "dir");
 
-
-        String filePath = "profile" + username + ".txt";
-        File profileFile = new File(filePath);
+        File profileFile = new File(user.getUserDir() + "/profile" + username + ".txt");
 
         if (!profileFile.exists()) {
             throw new IOException("Файл профиля для пользователя " + username + " не найден.");
@@ -238,15 +242,9 @@ public class MainMenuController {
         refreshCurrency();
         refreshLogs();
 
-
-
-        File file = new File(log.getName());
-        if (!file.exists()) {
-            log.logfileCreate();
-        }
-
         MainGreetings.setText("Добро пожаловать, " + user.getName() + "!");
         UserName.setText(user.getName());
+        UserEmail.setText(user.getEmail());
 
         // Обновление времени каждую секунду с помощью Timeline
         Timeline timeline = new Timeline(
@@ -274,9 +272,10 @@ public class MainMenuController {
             accountBox.setSpacing(5);
 
             // Создаём элементы для отображения информации о счетеБИ
-            Label nameLabel = new Label("Название: " + account.getName());
-            Label balanceLabel = new Label("Баланс: " + account.getBalance());
-            Label currencyLabel = new Label("Валюта: " + account.getCurrency());
+            Label nameLabel = new Label("Название: " + account.getName() + " |");
+            Label balanceLabel = new Label("Баланс: " + account.getBalance() + " " + account.getCurrency() + " |");
+            nameLabel.getStyleClass().add("objects-text");
+            balanceLabel.getStyleClass().add("objects-text");
 
             // Кнопка для изменения баланса
             Button editBalanceButton = new Button("Изменить баланс");
@@ -284,13 +283,20 @@ public class MainMenuController {
 
             // Кнопка для удаления счета
             Button deleteAccountButton = new Button("Удалить");
-            deleteAccountButton.setOnAction(event -> user.getAccounts().remove(account));
+            deleteAccountButton.getStyleClass().add("delete-button");
+            deleteAccountButton.setOnAction(event -> {
+                if (showConfirmationDialog() == true) {
+                user.getAccounts().remove(account);
+                user.saveAccountsToFile();
+                refreshAccounts();
+                }
+            });
 
             editBalanceButton.getStyleClass().add("button");
             deleteAccountButton.getStyleClass().add("button");
 
             // Добавляем элементы в HBox
-            accountBox.getChildren().addAll(nameLabel, balanceLabel, currencyLabel, editBalanceButton, deleteAccountButton);
+            accountBox.getChildren().addAll(nameLabel, balanceLabel, editBalanceButton, deleteAccountButton);
 
             // Добавляем HBox в основной контейнер (VBox)
             AccountContainer.getChildren().add(accountBox);
@@ -301,7 +307,7 @@ public class MainMenuController {
         // Создаем окно для ввода суммы и действия
         Stage accountWindow = new Stage();
         accountWindow.initModality(Modality.APPLICATION_MODAL);  // делает окно модальным
-        accountWindow.setTitle("Операции с счетом #" + account.getName());
+        accountWindow.setTitle("Операции с счетом #" + account.getName() + " | " + account.getBalance() + account.getCurrency());
 
         VBox accountLayout = new VBox(10);
         accountLayout.setPadding(new Insets(20));
@@ -323,9 +329,10 @@ public class MainMenuController {
                 }
                 // Логика пополнения счета
                 account.deposit(amount);
-                log.logfileUpdate("Пополнение;"+account.getName()+";"+amount+";"+reasonField.getText());
+                log.logfileUpdate("Пополнение;"+account.getName()+";"+amount+account.getCurrency() +";"+reasonField.getText());
                 showAlert("Успех", "Сумма успешно добавлена на счет #" + account.getName());
                 accountWindow.close();
+                user.saveAccountsToFile();
                 refreshAccounts();
             } catch (NumberFormatException ex) {
                 showAlert("Ошибка", "Введите правильную сумму для пополнения.");
@@ -342,9 +349,10 @@ public class MainMenuController {
                 }
                 // Логика снятия со счета
                 account.withdraw(amount);
-                log.logfileUpdate("Списание;"+account.getName()+";"+amount+";"+reasonField.getText());
+                log.logfileUpdate("Списание;"+account.getName()+";"+amount+account.getCurrency() +";"+reasonField.getText());
                 showAlert("Успех", "Сумма успешно снята с счета #" + account.getName());
                 accountWindow.close();
+                user.saveAccountsToFile();
                 refreshAccounts();
             } catch (NumberFormatException ex) {
                 showAlert("Ошибка", "Введите правильную сумму для снятия.");
@@ -374,6 +382,7 @@ public class MainMenuController {
         }
         user.getAccounts().add(new Account(newAccountName.getText(),Double.parseDouble(newAccountBalance.getText()), newAccountCurrency.getValue()));
         showSuccess("Новый счёт: "+ newAccountName.getText() + " успешно создан!");
+        user.saveAccountsToFile();
         log.logfileUpdate("Создан Счёт;"+newAccountName.getText()+";"+newAccountBalance.getText()+";");
         newAccountName.setText("");
         newAccountBalance.setText("");
@@ -384,7 +393,6 @@ public class MainMenuController {
     public void refreshGoals() {
         GoalsContainer.getChildren().clear();
         GoalsContainer.setSpacing(240); // Отступы между элементами
-        GoalsContainer.setAlignment(Pos.CENTER_LEFT); // Выравнивание по левому краю
 
         for (Goal goal : user.getGoals()) {
             Pane pane = new Pane();
@@ -423,6 +431,9 @@ public class MainMenuController {
                     goal.getTitle() + ": " + (int) (progressPercentage * 100) + "%");
             goalText.setFill(Color.BLACK);
 
+            // Устанавливаем абсолютные координаты для элементов
+
+
             // Устанавливаем размер панели
             pane.setPrefSize(250, 250); // Фиксированный размер для каждой панели
             pane.getChildren().addAll(circle, progressArc, goalText);
@@ -434,10 +445,6 @@ public class MainMenuController {
             // Добавляем панель в контейнер
             GoalsContainer.getChildren().add(pane);
         }
-        GoalsScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS); // Полоса прокрутки всегда
-        GoalsScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);  // Не показывать вертикальную полосу
-        GoalsScrollPane.setPannable(true); // Возможность прокрутки мышью
-
     }
 
     private void openGoalWindow(Goal goal) {
@@ -472,6 +479,7 @@ public class MainMenuController {
                 log.logfileUpdate("Добавление к цели;" + goal.getTitle() + ";" + amount + ";");
                 showAlert("Успех", "Сумма успешно добавлена к цели: " + goal.getTitle());
                 goalWindow.close();
+                user.saveGoalsToFile();
                 refreshGoals(); // Обновляем отображение целей
             } catch (NumberFormatException ex) {
                 showAlert("Ошибка", "Введите правильную сумму для добавления.");
@@ -501,6 +509,7 @@ public class MainMenuController {
         }
         user.getGoals().add(new Goal(newGoalName.getText(),0.0, Double.parseDouble(newGoalTarget.getText()), newGoalDescription.getText()));
         showSuccess("Новая цель: "+ newGoalName.getText() + " успешно создана!");
+        user.saveGoalsToFile();
         log.logfileUpdate("Создана цель;"+newGoalName.getText()+";"+newGoalTarget.getText()+";");
         newGoalName.setText("");
         newGoalTarget.setText("");
@@ -514,23 +523,32 @@ public class MainMenuController {
         for (Note note : user.getNotes()) {
             // Создаем HBox для каждой заметки
             HBox noteBlock = new HBox(10);
+            noteBlock.getStyleClass().add("account-box");
+            noteBlock.setPadding(new Insets(10));
+
 
             // Текст для заголовка
-            Text titleText = new Text(note.getTitle());
-            // Текст для содержания
-            Text contentText = new Text(note.getDescription());
-
+            Text titleText = new Text(note.getTitle() + " |");
+            titleText.getStyleClass().add("objects-text");
+            // Текст для категории
+            Text categoryText = new Text(note.getCategory() + " |");
+            categoryText.getStyleClass().add("objects-text");
             // Кнопка удаления
             Button deleteButton = new Button("Удалить");
+            deleteButton.getStyleClass().add("delete-button");
             deleteButton.setOnAction(event -> {
+                if (showConfirmationDialog() == true) {
                 user.getNotes().remove(note); // Удаляем блок
+                refreshNotes();
+                user.saveNotesToFile();
+                }
             });
 
             // Добавляем обработчик клика для заметки
             noteBlock.setOnMouseClicked(event -> openNoteWindow(note));
 
             // Добавляем текст и кнопку в HBox
-            noteBlock.getChildren().addAll(titleText, contentText, deleteButton);
+            noteBlock.getChildren().addAll(titleText,categoryText, deleteButton);
 
             // Добавляем HBox в контейнер
             noteContainer.getChildren().add(noteBlock);
@@ -550,15 +568,51 @@ public class MainMenuController {
         TextField noteTitle = new TextField();
         noteTitle.setText(note.getTitle());
 
+        TextField noteCategory = new TextField();
+        noteCategory.setText(note.getCategory());
+
         TextArea noteText = new TextArea();
         noteText.setText(note.getDescription());
+        noteText.setWrapText(true);
 
-        noteLayout.getChildren().addAll(noteTitle, noteText);
+        Button saveChangedNote = new Button();
+        saveChangedNote.setText("Сохранить");
+
+        saveChangedNote.setOnAction(e -> {
+            if (noteTitle.getText().isEmpty() || noteCategory.getText().isEmpty() ||
+                    noteText.getText().isEmpty()) {
+                showError("Заполните все поля!");
+                return;
+            }
+            note.setTitle(noteTitle.getText());
+            note.setCategory(noteCategory.getText());
+            note.setDescription(noteText.getText());
+            noteWindow.close();
+            showSuccess("Изменения сохранены!");
+            refreshNotes();
+            user.saveNotesToFile();
+        });
+
+        noteLayout.getChildren().addAll(noteTitle,noteCategory, noteText,saveChangedNote);
 
         // Сцена для окна с операциями
         Scene goalScene = new Scene(noteLayout, 450, 200);
         noteWindow.setScene(goalScene);
         noteWindow.show();
+    }
+
+    public void createNewNote(ActionEvent event) {
+        if (newNoteName.getText().isEmpty() || newNoteDescription.getText().isEmpty() ||
+        newNoteCategory.getText().isEmpty()) {
+            showError("Заполните все поля!");
+            return;
+        }
+        user.getNotes().add(new Note(newNoteName.getText(), newNoteDescription.getText(), newNoteCategory.getText()));
+        showSuccess("Новая записка: "+ newNoteName.getText() + " успешно создана!");
+        newNoteName.setText("");
+        newNoteDescription.setText("");
+        user.saveNotesToFile();
+        refreshNotes();
     }
 
     public void refreshCurrency() throws IOException {
@@ -610,12 +664,13 @@ public class MainMenuController {
                     // Создаем новый блок для отображения лога
                     // Создаем контейнер для лога
                     VBox logBlock = new VBox(5);
-
+                    logBlock.getStyleClass().add("logs-box");
                     // Текст с операцией
                     Text operationText = new Text("Операция: " + operation);
+                    operationText.getStyleClass().add("logs-text");
                     // Текст с датой и временем
                     Text dateText = new Text("Дата и время: " + dateStr);
-
+                    dateText.getStyleClass().add("logs-text");
                     // Добавляем текстовые элементы в VBox
                     logBlock.getChildren().addAll(operationText, dateText);
 
@@ -725,5 +780,31 @@ public class MainMenuController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // Метод для создания и отображения окна подтверждения
+    public static boolean showConfirmationDialog() {
+        // Создаем Alert (диалоговое окно)
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Подтверждение");
+        alert.setHeaderText(null); // Убираем заголовок, если не нужен
+        alert.setContentText("Вы уверены?"); // Устанавливаем сообщение
+
+        // Добавляем кнопки "Да" и "Нет"
+        ButtonType yesButton = new ButtonType("Да");
+        ButtonType noButton = new ButtonType("Нет");
+
+        // Устанавливаем кнопки
+        alert.getButtonTypes().setAll(yesButton, noButton);
+
+        // Показываем окно и ждем ответ пользователя
+        alert.showAndWait();
+
+        // Проверяем, какая кнопка была нажата
+        if (alert.getResult() == yesButton) {
+            return true;  // Пользователь подтвердил действие
+        } else {
+            return false; // Пользователь отменил действие
+        }
     }
 }

@@ -11,6 +11,10 @@
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/Transaction.java" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/User.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/com/example/cursproject/Images/addIcon.png" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/com/example/cursproject/Images/exitbtn.jpg" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/com/example/cursproject/Images/savebtn.png" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/com/example/cursproject/Images/settingsbtn.png" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/resources/com/example/cursproject/styles.css" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/styles" charset="windows-1251" />
   </component>

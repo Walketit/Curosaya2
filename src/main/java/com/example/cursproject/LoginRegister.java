@@ -21,6 +21,7 @@ public class LoginRegister extends Application {
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
 
         primaryStage.setTitle("Добро пожаловать в СУФ!");
         primaryStage.show();

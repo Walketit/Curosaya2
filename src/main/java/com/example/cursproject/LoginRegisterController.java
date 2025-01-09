@@ -3,6 +3,7 @@ package com.example.cursproject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -10,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -136,6 +138,7 @@ public class LoginRegisterController {
             MainMenuController mainMenuController = loader.getController();
             mainMenuController.setUser(login); // Передача логина
             stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
+            stage.setResizable(false);
             scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -146,7 +149,7 @@ public class LoginRegisterController {
 
     // Метод для регистрации
     @FXML
-    private void handleRegister(ActionEvent event) {
+    private void handleRegister(ActionEvent event) throws IOException {
         String login = RegLogField.getText().trim();
         String password = RegPassField.getText().trim();
         String confirmPassword = PswrdConfirmField.getText().trim();

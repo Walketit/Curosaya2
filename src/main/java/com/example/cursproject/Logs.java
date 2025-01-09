@@ -14,19 +14,6 @@ public class Logs {
         this.time = new Time();
     }
 
-    // Метод для создания файла логов
-    public void logfileCreate() {
-        try {
-            File file = new File(name);
-            if (!file.createNewFile()) {
-                System.out.println("Ошибка создания файла!");
-                System.exit(1);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     // Метод для обновления файла логов
     public void logfileUpdate(String log) {
         time.currentTime(); // Получаем текущее время
@@ -63,7 +50,7 @@ public class Logs {
 
     public void setUser(User user) {
         this.user = user;
-        this.name = user.getName() + "logs.txt";
+        this.name = user.getUserDir() + "/" + user.getName() + "Логи.txt";
     }
 
     // Геттер для объекта Time
