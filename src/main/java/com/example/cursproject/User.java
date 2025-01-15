@@ -2,14 +2,12 @@ package com.example.cursproject;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class User {
     private String name; // Имя пользователя
     private String email; // Адрес электронной почты
-    protected boolean isAdmin; // Флаг администратора (0 - обычный пользователь, 1 - администратор)
+    private boolean isAdmin; // Флаг администратора (0 - обычный пользователь, 1 - администратор)
     private List<Account> accounts;
 
     private List<Goal> goals;
@@ -17,6 +15,8 @@ public class User {
     private List<Note> notes;
 
     private String userDir;
+    private String occupation;
+    private String age;
 
     public User() {
         this.name = "";
@@ -57,6 +57,8 @@ public class User {
                     } else {
                         writer.write("Статус:Юзер\n");
                     }
+                    writer.write("Возраст:\n");
+                    writer.write("Занятость:\n");
                     if (accountsFile.createNewFile()) {
                         System.out.println("Файл успешно создан: " + accountsFile.getAbsolutePath());
                     } else {
@@ -199,13 +201,6 @@ public class User {
         }
     }
 
-    // Методы обработки строк
-    // Метод для форматирования информации о пользователе
-    public String getFormattedInfo() {
-        return String.format("Пользователь #%d: Имя: %s, Email: %s, Статус: %s",
-                name, email, isAdmin ? "Администратор" : "Юзер");
-    }
-
     public void saveAccountsToFile() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(userDir + "/" + name + "Счета.txt"))) {
             for (Account account : accounts) {
@@ -251,5 +246,39 @@ public class User {
 
     public String getUserDir() {
         return userDir;
+    }
+
+    public void setAge(String line) {
+        this.age = line;
+    }
+
+    public void setOccupation(String line) {
+        this.occupation = line;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public void saveProfile(String email, String age, String occupation) throws IOException {
+        this.email = email;
+        this.age = age;
+        this.occupation = occupation;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(userDir + "/profile" + name + ".txt"))) {
+            writer.write("Имя:" + name + "\n");
+            writer.write("Почта:" + email + "\n");
+            if (isAdmin) {
+                writer.write("Статус:Админ\n");
+            } else {
+                writer.write("Статус:Юзер\n");
+            }
+            writer.write("Возраст:" + age + "\n");
+            writer.write("Занятость:" + occupation + "\n");
+        }
     }
 }

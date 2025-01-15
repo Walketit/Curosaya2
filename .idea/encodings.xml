@@ -7,6 +7,7 @@
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/Goal.java" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/Logs.java" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/Note.java" charset="windows-1251" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/ParentUser.java" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/Time.java" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/Transaction.java" charset="windows-1251" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/example/cursproject/User.java" charset="UTF-8" />

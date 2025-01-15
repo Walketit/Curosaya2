@@ -3,37 +3,29 @@ package com.example.cursproject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 public class LoginRegisterController {
 
     private static final String USER_DATABASE_FILE = "users.txt";
 
+    private Map<String, String> users = loadUsers();
     private Stage stage;
     private Scene scene;
-    private Parent root;
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private RadioButton AdminBtn;
@@ -42,7 +34,7 @@ public class LoginRegisterController {
     private TextField EmailRegField;
 
     @FXML
-    private TextField LogPassField;
+    private PasswordField LogPassField;
 
     @FXML
     private Text LogRegTitle;
@@ -54,13 +46,13 @@ public class LoginRegisterController {
     private TextField LoginLogField;
 
     @FXML
-    private TextField PswrdConfirmField;
+    private PasswordField PswrdConfirmField;
 
     @FXML
     private TextField RegLogField;
 
     @FXML
-    private TextField RegPassField;
+    private PasswordField RegPassField;
 
     @FXML
     private Button RegisterBtn;
@@ -128,7 +120,6 @@ public class LoginRegisterController {
             return;
         }
 
-        Map<String, String> users = loadUsers();
         if (users.containsKey(login) && users.get(login).equals(password)) {
             statusMessage.setText("Успешный вход!");
             // Загрузка второго окна
@@ -168,7 +159,6 @@ public class LoginRegisterController {
             return;
         }
 
-        Map<String, String> users = loadUsers();
         if (users.containsKey(login)) {
             statusMessage.setText("Пользователь с таким логином уже существует.");
             return;
@@ -177,6 +167,7 @@ public class LoginRegisterController {
         if (saveUser(login, password)) {
             click(event);
             statusMessage.setText("Регистрация успешна! Теперь вы можете войти.");
+            users.put(login, password);
             User newUser = new User(login, email, isAdmin);
         } else {
             statusMessage.setText("Ошибка при сохранении пользователя.");
@@ -215,5 +206,21 @@ public class LoginRegisterController {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private void saveUser() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USER_DATABASE_FILE))) {
+            for (Map.Entry<String, String> str: users.entrySet()) {
+                writer.write(str.getKey() + ":" + str.getValue());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteUser(String login) {
+        users.remove(login);
+        saveUser();
     }
 }

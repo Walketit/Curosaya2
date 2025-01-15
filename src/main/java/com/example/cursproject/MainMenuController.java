@@ -1,29 +1,28 @@
 package com.example.cursproject;
 
 import java.io.*;
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
+import java.util.List;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -32,181 +31,69 @@ public class MainMenuController {
 
     private Stage stage;
     private Scene scene;
-    private Parent root;
     private User user = new User();
     CurrencyChange change = new CurrencyChange();
 
     Logs log = new Logs();
     Time time = new Time();
 
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
-
-    @FXML
-    private Text AccountBalance;
-
-    @FXML
-    private ChoiceBox<String> AccountChoose;
-
-    @FXML
-    private Button AccountDeleteBtn;
-
-    @FXML
-    private Text AccountName;
-
     @FXML
     private AnchorPane AccountScene;
-
-    @FXML
-    private TextField AccountTranscationField;
-
-    @FXML
-    private Button AccountsBtn;
-
     @FXML
     private TextField CurrencyAmountIn;
-
     @FXML
     private Text CurrencyAmountOut;
-
-    @FXML
-    private Button CurrencyChangeBtn;
-
     @FXML
     private AnchorPane CurrencyChangeScene;
-
     @FXML
     private ChoiceBox<String> CurrencyFirstChoice;
-
     @FXML
     private ChoiceBox<String> CurrencySecondChoice;
-
-    @FXML
-    private Button ExitBtn;
-
-    @FXML
-    private ChoiceBox<?> GoalChoice;
-
-    @FXML
-    private Text GoalCurrentStatus;
-
-    @FXML
-    private Button GoalDeleteBtn;
-
-    @FXML
-    private Text GoalName;
-
-    @FXML
-    private Button GoalRedoBtn;
-
-    @FXML
-    private Button GoalsBtn;
-
     @FXML
     private AnchorPane GoalsScene;
-
-    @FXML
-    private Button LogsBtn;
-
-    @FXML
-    private Button MainBtn;
-
-    @FXML
-    private Text MainGreetings;
-
-    @FXML
-    private AnchorPane MainMenu;
-
-    @FXML
-    private AnchorPane MainMenuScene;
-
-    @FXML
-    private Button MakeTransactionBtn;
-
-    @FXML
-    private Button NotesBtn;
-
-    @FXML
-    private Button ProfileBtn;
-
-    @FXML
-    private ImageView ProfileImage;
-
     @FXML
     private AnchorPane ProfileScene;
-
-    @FXML
-    private Button RedoProfile;
-
-    @FXML
-    private Button SettingsBtn;
-
     @FXML
     private Text UserEmail;
-
     @FXML
     private Text UserName;
-
     @FXML
     private VBox AccountContainer;
-
-    @FXML
-    private Button CurrencyRefresh;
-
     @FXML
     private HBox GoalsContainer;
-
-    @FXML
-    private ScrollPane GoalsScrollPane;
-
     @FXML
     private VBox noteContainer;
-
     @FXML
     private AnchorPane notesScene;
-
     @FXML
     private Text timeLabel;
-
     @FXML
     private AnchorPane logsScene;
-
     @FXML
     private VBox logsContainer;
-
     @FXML
     private TextField newAccountName;
-
     @FXML
     private TextField newAccountBalance;
-
     @FXML
     private ChoiceBox<String> newAccountCurrency;
-
     @FXML
     private TextField newGoalName;
-
     @FXML
     private TextField newGoalTarget;
-
     @FXML
     private TextArea newGoalDescription;
-
     @FXML
     private TextField newNoteName;
-
     @FXML
     private TextArea newNoteDescription;
-
     @FXML
     private TextField newNoteCategory;
-
     @FXML
-    private Button newGoalBtn;
+    private Text userAge;
+    @FXML
+    private Text userOccupation;
+
     @FXML
     private void Exit(ActionEvent event) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("LoginRegister.fxml"));
@@ -232,6 +119,10 @@ public class MainMenuController {
                     user.setName(line.substring(4).trim());
                 } else if (line.startsWith("Почта:")) {
                     user.setEmail(line.substring(6).trim());
+                } else if (line.startsWith("Возраст:")) {
+                    user.setAge(line.substring(8).trim());
+                } else if (line.startsWith("Занятость:")) {
+                    user.setOccupation(line.substring(10).trim());
                 }
             }
         }
@@ -239,10 +130,11 @@ public class MainMenuController {
         user.loadAccountsFromFile();
         user.loadGoalsFromFile();
         user.loadNotesFromFile();
+
         refreshCurrency();
         refreshLogs();
+        refreshProfile();
 
-        MainGreetings.setText("Добро пожаловать, " + user.getName() + "!");
         UserName.setText(user.getName());
         UserEmail.setText(user.getEmail());
 
@@ -252,11 +144,8 @@ public class MainMenuController {
         );
         timeline.setCycleCount(Timeline.INDEFINITE); // Бесконечное обновление
         timeline.play(); // Запуск таймлайна для обновления времени
-
         // Инициализируем отображение времени сразу при запуске
         updateTime();
-
-
     }
 
     @FXML
@@ -286,9 +175,9 @@ public class MainMenuController {
             deleteAccountButton.getStyleClass().add("delete-button");
             deleteAccountButton.setOnAction(event -> {
                 if (showConfirmationDialog() == true) {
-                user.getAccounts().remove(account);
-                user.saveAccountsToFile();
-                refreshAccounts();
+                    user.getAccounts().remove(account);
+                    user.saveAccountsToFile();
+                    refreshAccounts();
                 }
             });
 
@@ -329,7 +218,7 @@ public class MainMenuController {
                 }
                 // Логика пополнения счета
                 account.deposit(amount);
-                log.logfileUpdate("Пополнение;"+account.getName()+";"+amount+account.getCurrency() +";"+reasonField.getText());
+                log.logfileUpdate("Пополнение;" + account.getName() + ";" + amount + account.getCurrency() + ";" + reasonField.getText());
                 showAlert("Успех", "Сумма успешно добавлена на счет #" + account.getName());
                 accountWindow.close();
                 user.saveAccountsToFile();
@@ -349,7 +238,7 @@ public class MainMenuController {
                 }
                 // Логика снятия со счета
                 account.withdraw(amount);
-                log.logfileUpdate("Списание;"+account.getName()+";"+amount+account.getCurrency() +";"+reasonField.getText());
+                log.logfileUpdate("Списание;" + account.getName() + ";" + amount + account.getCurrency() + ";" + reasonField.getText());
                 showAlert("Успех", "Сумма успешно снята с счета #" + account.getName());
                 accountWindow.close();
                 user.saveAccountsToFile();
@@ -360,7 +249,7 @@ public class MainMenuController {
         });
 
         // Добавляем элементы в окно
-        accountLayout.getChildren().addAll(amountField,reasonField, depositButton, withdrawButton);
+        accountLayout.getChildren().addAll(amountField, reasonField, depositButton, withdrawButton);
 
         // Сцена для окна с операциями
         Scene accountScene = new Scene(accountLayout, 450, 200);
@@ -380,10 +269,10 @@ public class MainMenuController {
                 return;
             }
         }
-        user.getAccounts().add(new Account(newAccountName.getText(),Double.parseDouble(newAccountBalance.getText()), newAccountCurrency.getValue()));
-        showSuccess("Новый счёт: "+ newAccountName.getText() + " успешно создан!");
+        user.getAccounts().add(new Account(newAccountName.getText(), Double.parseDouble(newAccountBalance.getText()), newAccountCurrency.getValue()));
+        showSuccess("Новый счёт: " + newAccountName.getText() + " успешно создан!");
         user.saveAccountsToFile();
-        log.logfileUpdate("Создан Счёт;"+newAccountName.getText()+";"+newAccountBalance.getText()+";");
+        log.logfileUpdate("Создан Счёт;" + newAccountName.getText() + ";" + newAccountBalance.getText() + ";");
         newAccountName.setText("");
         newAccountBalance.setText("");
         refreshAccounts();
@@ -487,7 +376,7 @@ public class MainMenuController {
         });
 
         // Добавляем элементы в окно
-        goalLayout.getChildren().addAll(balanceLabel,amountField, addButton);
+        goalLayout.getChildren().addAll(balanceLabel, amountField, addButton);
 
         // Сцена для окна с операциями
         Scene goalScene = new Scene(goalLayout, 450, 200);
@@ -507,10 +396,10 @@ public class MainMenuController {
                 return;
             }
         }
-        user.getGoals().add(new Goal(newGoalName.getText(),0.0, Double.parseDouble(newGoalTarget.getText()), newGoalDescription.getText()));
-        showSuccess("Новая цель: "+ newGoalName.getText() + " успешно создана!");
+        user.getGoals().add(new Goal(newGoalName.getText(), 0.0, Double.parseDouble(newGoalTarget.getText()), newGoalDescription.getText()));
+        showSuccess("Новая цель: " + newGoalName.getText() + " успешно создана!");
         user.saveGoalsToFile();
-        log.logfileUpdate("Создана цель;"+newGoalName.getText()+";"+newGoalTarget.getText()+";");
+        log.logfileUpdate("Создана цель;" + newGoalName.getText() + ";" + newGoalTarget.getText() + ";");
         newGoalName.setText("");
         newGoalTarget.setText("");
         newGoalDescription.setText("");
@@ -538,9 +427,9 @@ public class MainMenuController {
             deleteButton.getStyleClass().add("delete-button");
             deleteButton.setOnAction(event -> {
                 if (showConfirmationDialog() == true) {
-                user.getNotes().remove(note); // Удаляем блок
-                refreshNotes();
-                user.saveNotesToFile();
+                    user.getNotes().remove(note); // Удаляем блок
+                    refreshNotes();
+                    user.saveNotesToFile();
                 }
             });
 
@@ -548,7 +437,7 @@ public class MainMenuController {
             noteBlock.setOnMouseClicked(event -> openNoteWindow(note));
 
             // Добавляем текст и кнопку в HBox
-            noteBlock.getChildren().addAll(titleText,categoryText, deleteButton);
+            noteBlock.getChildren().addAll(titleText, categoryText, deleteButton);
 
             // Добавляем HBox в контейнер
             noteContainer.getChildren().add(noteBlock);
@@ -593,7 +482,7 @@ public class MainMenuController {
             user.saveNotesToFile();
         });
 
-        noteLayout.getChildren().addAll(noteTitle,noteCategory, noteText,saveChangedNote);
+        noteLayout.getChildren().addAll(noteTitle, noteCategory, noteText, saveChangedNote);
 
         // Сцена для окна с операциями
         Scene goalScene = new Scene(noteLayout, 450, 200);
@@ -603,12 +492,12 @@ public class MainMenuController {
 
     public void createNewNote(ActionEvent event) {
         if (newNoteName.getText().isEmpty() || newNoteDescription.getText().isEmpty() ||
-        newNoteCategory.getText().isEmpty()) {
+                newNoteCategory.getText().isEmpty()) {
             showError("Заполните все поля!");
             return;
         }
         user.getNotes().add(new Note(newNoteName.getText(), newNoteDescription.getText(), newNoteCategory.getText()));
-        showSuccess("Новая записка: "+ newNoteName.getText() + " успешно создана!");
+        showSuccess("Новая записка: " + newNoteName.getText() + " успешно создана!");
         newNoteName.setText("");
         newNoteDescription.setText("");
         user.saveNotesToFile();
@@ -629,13 +518,6 @@ public class MainMenuController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    // Метод для сохранения обновленных данных счетов в файл
-    public void saveInfo(ActionEvent e) {
-        user.saveAccountsToFile();
-        user.saveGoalsToFile();
-        user.saveNotesToFile();
     }
 
     public void currencyChange(ActionEvent event) throws IOException {
@@ -687,9 +569,153 @@ public class MainMenuController {
         }
     }
 
+    public void openExportWindow(ActionEvent event) {
+        Stage exportWindow = new Stage();
+        exportWindow.initModality(Modality.APPLICATION_MODAL); // делает окно модальным
+        exportWindow.setTitle("Экспорт");
+
+        Label fromDateLabel = new Label("С даты:");
+        DatePicker fromDatePicker = new DatePicker();
+
+        Label toDateLabel = new Label("По дату:");
+        DatePicker toDatePicker = new DatePicker();
+
+        Button exportButton = new Button("Экспортировать");
+        exportButton.setOnAction(e -> {
+            LocalDate fromDate = fromDatePicker.getValue();
+            LocalDate toDate = toDatePicker.getValue();
+
+            if (fromDate != null && toDate != null && !fromDate.isAfter(toDate)) {
+                // Открываем FileChooser для выбора места сохранения
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Сохранить логи");
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"));
+                File file = fileChooser.showSaveDialog(((Node) event.getSource()).getScene().getWindow());
+
+                // Если пользователь выбрал файл
+                if (file != null) {
+                    String outputFile = file.getAbsolutePath();
+                    log.exportLogsToFile(fromDate, toDate, outputFile);
+                    showAlert("Успех", "Логи успешно экспортированы в файл: " + outputFile);
+                } else {
+                    showAlert("Ошибка", "Укажите корректный диапазон дат.");
+                }
+            }
+        });
+
+        VBox layout = new VBox(10, fromDateLabel, fromDatePicker, toDateLabel, toDatePicker, exportButton);
+        layout.setPadding(new Insets(10));
+
+        Scene exportScene = new Scene(layout, 450, 200);
+        exportWindow.setScene(exportScene);
+        exportWindow.show();
+    }
+
+    public void openImportWindow(ActionEvent event) {
+        Stage importWindow = new Stage();
+        importWindow.initModality(Modality.APPLICATION_MODAL); // делает окно модальным
+        importWindow.setTitle("Экспорт");
+
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+        ScrollPane scrollPane = new ScrollPane(vbox);
+
+        Button selectFileButton = new Button("Выбрать файл");
+        selectFileButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"));
+            File file = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
+
+            if (file != null) {
+                try {
+                    vbox.getChildren().clear();
+                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            vbox.getChildren().add(new Label(line));
+                        }
+                    }
+                } catch (IOException ex) {
+                    showAlert("Ошибка", "Не удалось прочитать файл.");
+                }
+            }
+        });
+
+        VBox layout = new VBox(10, selectFileButton, scrollPane);
+        layout.setPadding(new Insets(10));
+
+        Scene importScene = new Scene(layout, 450, 200);
+        importWindow.setScene(importScene);
+        importWindow.show();
+    }
+
+    @FXML
+    private void redoProfile(ActionEvent event) {
+        Stage profileWindow = new Stage();
+        profileWindow.initModality(Modality.APPLICATION_MODAL);  // делает окно модальным
+        profileWindow.setTitle("Редактирование профиля");
+
+        VBox profileLayout = new VBox(10);
+        profileLayout.setPadding(new Insets(20));
+
+        Label emailLabel = new Label("Почта:");
+        TextField email = new TextField(user.getEmail());
+        Label ageLabel = new Label("Возраст:");
+        TextField age = new TextField(user.getAge());
+        Label occupationLabel = new Label("Занятость:");
+        TextField occupation = new TextField(user.getOccupation());
+
+        Button saveProfile = new Button();
+        saveProfile.setText("Сохранить");
+        saveProfile.setOnAction(e -> {
+            try {
+                user.saveProfile(email.getText(), age.getText(), occupation.getText());
+                profileWindow.close();
+                refreshProfile();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        profileLayout.getChildren().addAll(emailLabel, email, ageLabel, age, occupationLabel, occupation, saveProfile);
+
+        Scene profileScene = new Scene(profileLayout, 450, 250);
+        profileWindow.setScene(profileScene);
+        profileWindow.show();
+    }
+
+    private void refreshProfile() {
+        UserName.setText(user.getName());
+        UserEmail.setText(user.getEmail());
+        userAge.setText(user.getAge());
+        userOccupation.setText(user.getOccupation());
+    }
+
+    public void deleteProfile(ActionEvent event) {
+        if (showConfirmationDialog()) {
+            try {
+                File file = new File(user.getUserDir());
+                for (File subfile : file.listFiles()) {
+                    subfile.delete();
+                }
+                file.delete();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginRegister.fxml"));
+                Parent root = loader.load();
+                LoginRegisterController loginRegisterController = loader.getController();
+                loginRegisterController.deleteUser(user.getName());
+                stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     public void openProfile(ActionEvent e) {
-        MainMenuScene.setVisible(false);
         GoalsScene.setVisible(false);
+        refreshProfile();
         AccountScene.setVisible(false);
         CurrencyChangeScene.setVisible(false);
         ProfileScene.setVisible(true);
@@ -697,18 +723,7 @@ public class MainMenuController {
         logsScene.setVisible(false);
     }
 
-    public void openMain(ActionEvent event) {
-        MainMenuScene.setVisible(true);
-        GoalsScene.setVisible(false);
-        AccountScene.setVisible(false);
-        CurrencyChangeScene.setVisible(false);
-        ProfileScene.setVisible(false);
-        notesScene.setVisible(false);
-        logsScene.setVisible(false);
-    }
-
     public void openAccounts(ActionEvent event) {
-        MainMenuScene.setVisible(false);
         GoalsScene.setVisible(false);
         refreshAccounts();
         AccountScene.setVisible(true);
@@ -719,7 +734,7 @@ public class MainMenuController {
     }
 
     public void openGoals(ActionEvent event) {
-        MainMenuScene.setVisible(false);
+
         refreshGoals();
         GoalsScene.setVisible(true);
         AccountScene.setVisible(false);
@@ -731,7 +746,6 @@ public class MainMenuController {
 
     public void openCurrencyChange(ActionEvent event) throws IOException {
         refreshCurrency();
-        MainMenuScene.setVisible(false);
         GoalsScene.setVisible(false);
         AccountScene.setVisible(false);
         CurrencyChangeScene.setVisible(true);
@@ -742,7 +756,6 @@ public class MainMenuController {
 
     public void openNotes(ActionEvent event) {
         refreshNotes();
-        MainMenuScene.setVisible(false);
         GoalsScene.setVisible(false);
         AccountScene.setVisible(false);
         CurrencyChangeScene.setVisible(false);
@@ -752,7 +765,6 @@ public class MainMenuController {
     }
 
     public void openLogs(ActionEvent event) {
-        MainMenuScene.setVisible(false);
         GoalsScene.setVisible(false);
         AccountScene.setVisible(false);
         CurrencyChangeScene.setVisible(false);
@@ -764,14 +776,12 @@ public class MainMenuController {
 
     // Метод для отображения ошибок
     private void showError(String message) {
-        System.err.println("Error: " + message);
-        // Здесь можно добавить вывод сообщения в Label или Alert
+        showAlert("Ошибка!", "Error: " + message);
     }
 
     // Метод для отображения успешных операций
     private void showSuccess(String message) {
-        System.out.println("Success: " + message);
-        // Здесь можно добавить вывод сообщения в Label или Alert
+        showAlert("Успех!", "Success: " + message);
     }
 
     private void showAlert(String title, String message) {
