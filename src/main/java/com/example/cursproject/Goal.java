@@ -58,24 +58,4 @@ public class Goal {
     public double getTargetAmount() {
         return targetAmount;
     }
-
-    // Сеттер для названия цели
-    public void setTitle(String title) {
-        this.name = title;
-    }
-
-    // Сеттер для описания цели
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    // Сеттер для текущей суммы
-    public void setCurrentBalance(double currentBalance) {
-        this.currentAmount = currentBalance;
-    }
-
-    // Сеттер для целевой суммы
-    public void setTargetAmount(double targetAmount) {
-        this.targetAmount = targetAmount;
-    }
 }

@@ -10,6 +10,7 @@ module com.example.cursproject {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.google.gson;
+    requires io.github.cdimascio.dotenv.java;
 
     opens com.example.cursproject to javafx.fxml;
     exports com.example.cursproject;

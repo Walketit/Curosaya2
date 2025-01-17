@@ -1,7 +1,5 @@
 package com.example.cursproject;
 
-import javafx.scene.shape.Path;
-
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 
 public class Logs {
-    private User user;
     private String name; // Имя файла логов
     private Time time; // Объект для работы с датой и временем
 
@@ -17,7 +14,6 @@ public class Logs {
 
     // Конструктор по умолчанию
     public Logs() {
-        this.user = null;
         this.name = "";
         this.time = new Time();
         this.content = new LinkedList<>();
@@ -52,14 +48,8 @@ public class Logs {
     }
 
     public void setUser(User user) {
-        this.user = user;
         this.name = user.getUserDir() + "/" + user.getName() + "Логи.txt";
         readLogs();
-    }
-
-    // Геттер для объекта Time
-    public Time getTime() {
-        return time;
     }
 
     public String getName() {
@@ -93,5 +83,9 @@ public class Logs {
         } catch (IOException e) {
             System.err.println("Ошибка при обработке файлов: " + e.getMessage());
         }
+    }
+
+    public LinkedList<String> getContent() {
+        return this.content;
     }
 }

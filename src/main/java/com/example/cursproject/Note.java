@@ -19,12 +19,6 @@ public class Note {
         this.category = category;
     }
 
-    // Метод для вывода заметки
-    public void printNote() {
-        System.out.println("Заметка: " + title);
-        System.out.println(content);
-    }
-
     // Геттер для заголовка заметки
     public String getTitle() {
         return title;

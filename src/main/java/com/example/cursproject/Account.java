@@ -1,6 +1,6 @@
 package com.example.cursproject;
 
-public class Account extends Logs {
+public class Account {
     private String name; // Название счета
     private String currency; // Валюта счета
     private double balance; // Баланс счета
@@ -24,12 +24,6 @@ public class Account extends Logs {
         this.currency = accCurrency;
     }
 
-    // Метод для вывода информации о счете
-    public void printAccount() {
-        System.out.println("Название счета: " + name);
-        System.out.printf("Баланс: %.2f %s\n", balance, currency);
-    }
-
     // Метод для пополнения счета
     public void deposit(double amount) {
         balance += amount;
@@ -40,23 +34,8 @@ public class Account extends Logs {
         if (balance >= amount) {
             balance -= amount;
         } else {
-            System.out.println("Insufficient funds!");
+            System.out.println("Недостаточно денег на балансе!");
         }
-    }
-
-    // Сеттер для баланса
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    // Сеттер для названия счета
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    // Сеттер для валюты счета
-    public void setCurrency(String currency) {
-        this.currency = currency;
     }
 
     // Геттер для баланса

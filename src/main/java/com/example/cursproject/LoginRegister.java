@@ -4,13 +4,10 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
 import javafx.stage.Stage;
-
 import java.io.*;
 import java.util.*;
 
 public class LoginRegister extends Application {
-    private static final String USER_DATABASE_FILE = "users.txt";
-
     public static void main(String[] args) {
         launch(args);
     }

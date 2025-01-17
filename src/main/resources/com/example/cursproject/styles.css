@@ -76,3 +76,7 @@
 .logs-box {
     -fx-padding: 10;
 }
+
+.completion-btn {
+    -fx-background-color: #90ee90;
+}

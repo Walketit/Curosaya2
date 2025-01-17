@@ -7,13 +7,9 @@ import java.util.List;
 public class User {
     private String name; // Имя пользователя
     private String email; // Адрес электронной почты
-    private boolean isAdmin; // Флаг администратора (0 - обычный пользователь, 1 - администратор)
     private List<Account> accounts;
-
     private List<Goal> goals;
-
     private List<Note> notes;
-
     private String userDir;
     private String occupation;
     private String age;
@@ -21,17 +17,15 @@ public class User {
     public User() {
         this.name = "";
         this.email = "";
-        this.isAdmin = false;
         this.accounts = new ArrayList<>();
         this.goals = new ArrayList<>();
         this.notes = new ArrayList<>();
     }
 
     // Конструктор для создания пользователя
-    public User(String name, String email, boolean isAdmin) {
+    public User(String name, String email) {
         this.name = name;
         this.email = email;
-        this.isAdmin = isAdmin;
         this.accounts = new ArrayList<>();
         this.userDir = name + "dir";
 
@@ -52,34 +46,12 @@ public class User {
                 try (FileWriter writer = new FileWriter(userFile)) {
                     writer.write("Имя:" + name + "\n");
                     writer.write("Почта:" + email + "\n");
-                    if (isAdmin) {
-                        writer.write("Статус:Админ\n");
-                    } else {
-                        writer.write("Статус:Юзер\n");
-                    }
                     writer.write("Возраст:\n");
                     writer.write("Занятость:\n");
-                    if (accountsFile.createNewFile()) {
-                        System.out.println("Файл успешно создан: " + accountsFile.getAbsolutePath());
-                    } else {
-                        System.out.println("Файл уже существует: " + accountsFile.getAbsolutePath());
-                    }
-                    if (goalsFile.createNewFile()) {
-                        System.out.println("Файл успешно создан: " + goalsFile.getAbsolutePath());
-                    } else {
-                        System.out.println("Файл уже существует: " + goalsFile.getAbsolutePath());
-                    }
-                    if (notesFile.createNewFile()) {
-                        System.out.println("Файл успешно создан: " + notesFile.getAbsolutePath());
-                    } else {
-                        System.out.println("Файл уже существует: " + notesFile.getAbsolutePath());
-                    }
-                    if (logFile.createNewFile()) {
-                        System.out.println("Файл успешно создан: " + logFile.getAbsolutePath());
-                    } else {
-                        System.out.println("Файл уже существует: " + logFile.getAbsolutePath());
-                    }
-                    System.out.println("Файл успешно сохранён: " + userFile.getAbsolutePath());
+                    accountsFile.createNewFile();
+                    goalsFile.createNewFile();
+                    notesFile.createNewFile();
+                    logFile.createNewFile();
                 } catch (IOException | RuntimeException e) {
                     e.printStackTrace();
                 }
@@ -94,7 +66,6 @@ public class User {
     }
 
     // Геттеры
-
     public String getName() {
         return name;
     }
@@ -115,21 +86,60 @@ public class User {
         return notes;
     }
 
-    public boolean isAdmin() {
-        if (isAdmin) return true;
-        return false;
+    public String getUserDir() {
+        return userDir;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public String getOccupation() {
+        return occupation;
     }
 
     public void setName(String name) {
         this.name = name;
     }
-
+    // сеттеры
     public void setUserDir(String name) {
         this.userDir = name;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setAge(String line) {
+        this.age = line;
+    }
+
+    public void setOccupation(String line) {
+        this.occupation = line;
+    }
+
+    // Методы для чтения из файлов
+    public void loadGoalsFromFile() {
+        try (BufferedReader br = new BufferedReader(new FileReader(userDir + "/" + name +  "Цели.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(";"); // Предполагается, что данные разделены ";"
+                if (parts.length == 4) {
+                    String name = parts[0];
+                    double currentAmount = Double.parseDouble(parts[1]);
+                    double targetAmount = Double.parseDouble(parts[2]);
+                    String description = parts[3];
+                    Goal goal = new Goal(name, currentAmount, targetAmount, description);
+                    goals.add(goal);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for (Goal goal : goals
+        ) {
+            goal.printGoal();
+        }
     }
 
     public void loadAccountsFromFile() {
@@ -161,30 +171,6 @@ public class User {
         }
     }
 
-    // Класс для чтения целей из файла
-    public void loadGoalsFromFile() {
-        try (BufferedReader br = new BufferedReader(new FileReader(userDir + "/" + name +  "Цели.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(";"); // Предполагается, что данные разделены ";"
-                if (parts.length == 4) {
-                    String name = parts[0];
-                    double currentAmount = Double.parseDouble(parts[1]);
-                    double targetAmount = Double.parseDouble(parts[2]);
-                    String description = parts[3];
-                    Goal goal = new Goal(name, currentAmount, targetAmount, description);
-                    goals.add(goal);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (Goal goal : goals
-        ) {
-            goal.printGoal();
-        }
-    }
-
     public void loadNotesFromFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader(userDir + "/" + name +  "Заметки.txt"))) {
             String line;
@@ -200,7 +186,7 @@ public class User {
             e.printStackTrace();
         }
     }
-
+    // Методы для сохранения данных в файлы
     public void saveAccountsToFile() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(userDir + "/" + name + "Счета.txt"))) {
             for (Account account : accounts) {
@@ -237,33 +223,6 @@ public class User {
         }
     }
 
-    public Account getAccount(String name) {
-        for (Account account : accounts) {
-            if (account.getName().equals(name)) return account;
-        }
-        return null;
-    }
-
-    public String getUserDir() {
-        return userDir;
-    }
-
-    public void setAge(String line) {
-        this.age = line;
-    }
-
-    public void setOccupation(String line) {
-        this.occupation = line;
-    }
-
-    public String getAge() {
-        return age;
-    }
-
-    public String getOccupation() {
-        return occupation;
-    }
-
     public void saveProfile(String email, String age, String occupation) throws IOException {
         this.email = email;
         this.age = age;
@@ -272,11 +231,6 @@ public class User {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(userDir + "/profile" + name + ".txt"))) {
             writer.write("Имя:" + name + "\n");
             writer.write("Почта:" + email + "\n");
-            if (isAdmin) {
-                writer.write("Статус:Админ\n");
-            } else {
-                writer.write("Статус:Юзер\n");
-            }
             writer.write("Возраст:" + age + "\n");
             writer.write("Занятость:" + occupation + "\n");
         }

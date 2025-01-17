@@ -1,11 +1,7 @@
 package com.example.cursproject;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.List;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -28,15 +24,12 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class MainMenuController {
-
     private Stage stage;
     private Scene scene;
     private User user = new User();
     CurrencyChange change = new CurrencyChange();
-
     Logs log = new Logs();
     Time time = new Time();
-
     @FXML
     private AnchorPane AccountScene;
     @FXML
@@ -135,9 +128,6 @@ public class MainMenuController {
         refreshLogs();
         refreshProfile();
 
-        UserName.setText(user.getName());
-        UserEmail.setText(user.getEmail());
-
         // Обновление времени каждую секунду с помощью Timeline
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.seconds(1), event -> updateTime())
@@ -181,11 +171,14 @@ public class MainMenuController {
                 }
             });
 
+            Button infoAccountButton = new Button("Просмотреть");
+            infoAccountButton.setOnAction(event -> openInfoAccount(account));
+
             editBalanceButton.getStyleClass().add("button");
             deleteAccountButton.getStyleClass().add("button");
 
             // Добавляем элементы в HBox
-            accountBox.getChildren().addAll(nameLabel, balanceLabel, editBalanceButton, deleteAccountButton);
+            accountBox.getChildren().addAll(nameLabel, balanceLabel, editBalanceButton, deleteAccountButton, infoAccountButton);
 
             // Добавляем HBox в основной контейнер (VBox)
             AccountContainer.getChildren().add(accountBox);
@@ -218,7 +211,7 @@ public class MainMenuController {
                 }
                 // Логика пополнения счета
                 account.deposit(amount);
-                log.logfileUpdate("Пополнение;" + account.getName() + ";" + amount + account.getCurrency() + ";" + reasonField.getText());
+                log.logfileUpdate("Пополнение;" + account.getName() + ";" + amount + ";" + account.getCurrency() + ";" + reasonField.getText() + ";");
                 showAlert("Успех", "Сумма успешно добавлена на счет #" + account.getName());
                 accountWindow.close();
                 user.saveAccountsToFile();
@@ -238,7 +231,7 @@ public class MainMenuController {
                 }
                 // Логика снятия со счета
                 account.withdraw(amount);
-                log.logfileUpdate("Списание;" + account.getName() + ";" + amount + account.getCurrency() + ";" + reasonField.getText());
+                log.logfileUpdate("Списание;" + account.getName() + ";" + amount + ";" + account.getCurrency() + ";" + reasonField.getText() + ";");
                 showAlert("Успех", "Сумма успешно снята с счета #" + account.getName());
                 accountWindow.close();
                 user.saveAccountsToFile();
@@ -257,6 +250,66 @@ public class MainMenuController {
         accountWindow.show();
     }
 
+    public void openInfoAccount(Account account) {
+        Stage accountWindow = new Stage();
+        accountWindow.initModality(Modality.APPLICATION_MODAL);  // делает окно модальным
+        accountWindow.setTitle("История счета #" + account.getName() + " | " + account.getBalance() + account.getCurrency());
+
+        VBox accountLayout = new VBox(10);
+        accountLayout.setPadding(new Insets(20));
+
+        // Метка для отображения баланса (пока 0, позже можно обновить)
+        Text balanceText = new Text("Баланс: " + account.getBalance() + account.getCurrency());
+        accountLayout.getChildren().add(balanceText);
+
+        // VBox для пополнений
+        VBox depositBox = new VBox(5);
+        depositBox.getChildren().add(new Text("Пополнения:"));
+        accountLayout.getChildren().add(depositBox);
+
+        // Оборачиваем VBox в ScrollPane с фиксированным размером
+        ScrollPane depositScrollPane = new ScrollPane(depositBox);
+        depositScrollPane.setPrefSize(350, 200);  // Задаем размер
+        accountLayout.getChildren().add(depositScrollPane);
+
+        // VBox для списаний
+        VBox withdrawalBox = new VBox(5);
+        withdrawalBox.getChildren().add(new Text("Списания:"));
+        accountLayout.getChildren().add(withdrawalBox);
+
+        // Оборачиваем VBox в ScrollPane с фиксированным размером
+        ScrollPane withdrawalScrollPane = new ScrollPane(withdrawalBox);
+        withdrawalScrollPane.setPrefSize(350, 200);  // Задаем размер
+        accountLayout.getChildren().add(withdrawalScrollPane);
+
+        for (String entry : log.getContent()) {
+            if (entry.startsWith("Пополнение")) {
+                String[] parts = entry.split(";");
+                if (parts[1].equals(account.getName())) {
+                    String type = parts[0];
+                    double amount = Double.parseDouble(parts[2]);
+                    String currency = parts[3];
+                    String reason = parts[4];
+                    depositBox.getChildren().add(new Text("+" + amount + " " + currency + ", " + reason + ":" + parts[5]));
+                }
+            }
+            if (entry.startsWith("Списание")) {
+                String[] parts = entry.split(";");
+                if (parts[1].equals(account.getName())) {
+                    String type = parts[0];
+                    double amount = Double.parseDouble(parts[2]);
+                    String currency = parts[3];
+                    String reason = parts[4];
+                    withdrawalBox.getChildren().add(new Text("-" + amount + " " + currency + ", " + reason + ":" + parts[5]));
+                }
+            }
+        }
+
+        Scene accountScene = new Scene(accountLayout, 400, 500);
+        accountWindow.setScene(accountScene);
+        accountWindow.show();
+    }
+
     public void createNewAccount(ActionEvent event) {
         if (newAccountName.getText().isEmpty() || newAccountCurrency.getValue().isEmpty() ||
                 newAccountBalance.getText().isEmpty()) {
@@ -269,7 +322,7 @@ public class MainMenuController {
                 return;
             }
         }
-        user.getAccounts().add(new Account(newAccountName.getText(), Double.parseDouble(newAccountBalance.getText()), newAccountCurrency.getValue()));
+        user.getAccounts().add(new Account(newAccountName.getText(), Double.parseDouble(newAccountBalance.getText()), (new CurrencyChange().getCode(newAccountCurrency.getValue()))));
         showSuccess("Новый счёт: " + newAccountName.getText() + " успешно создан!");
         user.saveAccountsToFile();
         log.logfileUpdate("Создан Счёт;" + newAccountName.getText() + ";" + newAccountBalance.getText() + ";");
@@ -281,12 +334,11 @@ public class MainMenuController {
     @FXML
     public void refreshGoals() {
         GoalsContainer.getChildren().clear();
-        GoalsContainer.setSpacing(240); // Отступы между элементами
 
         for (Goal goal : user.getGoals()) {
             Pane pane = new Pane();
-            double centerX = 100; // Координата центра X
-            double centerY = 100; // Координата центра Y
+            double centerX = 125; // Координата центра X
+            double centerY = 85; // Координата центра Y
             double radius = 80;   // Радиус круга
 
             // Создаем окружность (фон)
@@ -320,12 +372,26 @@ public class MainMenuController {
                     goal.getTitle() + ": " + (int) (progressPercentage * 100) + "%");
             goalText.setFill(Color.BLACK);
 
-            // Устанавливаем абсолютные координаты для элементов
-
+            Button completeBtn = new Button();
+            completeBtn.setLayoutX(centerX - 50);
+            completeBtn.setLayoutY(centerY + radius + 30);
+            completeBtn.getStyleClass().add("completion-btn");
+            completeBtn.setVisible(false);
+            completeBtn.setText("Завершить!");
+            completeBtn.setOnAction(event -> {
+                log.logfileUpdate("Цель: " + goal.getTitle() + " завершена!");
+                user.getGoals().remove(goal);
+                user.saveGoalsToFile();
+                refreshGoals();
+            });
 
             // Устанавливаем размер панели
             pane.setPrefSize(250, 250); // Фиксированный размер для каждой панели
-            pane.getChildren().addAll(circle, progressArc, goalText);
+            pane.getChildren().addAll(circle, progressArc, goalText, completeBtn);
+
+            if (goal.isAchieved()) {
+                completeBtn.setVisible(true);
+            }
 
             // Делаем окружность кликабельной
             circle.setOnMouseClicked(event -> openGoalWindow(goal));
@@ -511,9 +577,10 @@ public class MainMenuController {
         try (BufferedReader reader = new BufferedReader(new FileReader("CurrencyCodes.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                CurrencyFirstChoice.getItems().add(line);
-                CurrencySecondChoice.getItems().add(line);
-                newAccountCurrency.getItems().add(line);
+                String[] parts = line.split(":");
+                CurrencyFirstChoice.getItems().add(parts[0]);
+                CurrencySecondChoice.getItems().add(parts[0]);
+                newAccountCurrency.getItems().add(parts[0]);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -614,7 +681,7 @@ public class MainMenuController {
     public void openImportWindow(ActionEvent event) {
         Stage importWindow = new Stage();
         importWindow.initModality(Modality.APPLICATION_MODAL); // делает окно модальным
-        importWindow.setTitle("Экспорт");
+        importWindow.setTitle("Импорт");
 
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));

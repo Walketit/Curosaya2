@@ -1,32 +1,41 @@
 package com.example.cursproject;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.cdimascio.dotenv.Dotenv;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CurrencyChange {
-    private String code; // Код валюты
-    private String name; // Название валюты
-    private float rate; // Курс обмена
+    private Map<String, String> currencyNames; // Название валюты
 
     // Конструктор по умолчанию
     CurrencyChange() {
-        this.code = "";
-        this.name = "";
-        this.rate = 0;
+        currencyNames = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("CurrencyCodes.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length == 2) {
+                    currencyNames.put(parts[0], parts[1]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-
     // Метод для установки курса обмена валюты
-    public String setCurrencyChange(String base_code, String target_code, double amount) throws IOException {
+    public String setCurrencyChange(String base_name, String target_name, double amount) throws IOException {
+        Dotenv dotenv = Dotenv.load();
         // Setting URL
-        String url_str = "https://v6.exchangerate-api.com/v6/5fdc25f18976669688828416/pair/" + base_code + "/" + target_code;
+        String url_str = "https://v6.exchangerate-api.com/v6/"+dotenv.get("API_KEY") +"/pair/" + currencyNames.get(base_name) + "/" + currencyNames.get(target_name);
 
         // Making Request
         URL url = new URL(url_str);
@@ -40,17 +49,16 @@ public class CurrencyChange {
         // Accessing object
         String req_result = jsonobj.get("result").getAsString();
         if (req_result.equals("success")) {
-            return String.valueOf((amount * jsonobj.get("conversion_rate").getAsDouble()));
+            DecimalFormat df = new DecimalFormat("#.00");
+            return df.format((amount * jsonobj.get("conversion_rate").getAsDouble()));
         }
         else {
             System.out.println("Error");
-            return null;
+            return "Ошибка! Проверьте подключение к интернету.";
         }
     }
 
-    // Метод для выполнения обмена валюты
-    public void change(float amount) {
-        System.out.println("Обмен " + name);
-        System.out.printf("%.3f = %.3f\n", amount, amount * rate);
+    public String getCode(String value) {
+        return currencyNames.get(value);
     }
 }

@@ -12,7 +12,6 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,52 +19,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LoginRegisterController {
-
     private static final String USER_DATABASE_FILE = "users.txt";
-
     private Map<String, String> users = loadUsers();
     private Stage stage;
     private Scene scene;
-
     @FXML
     private RadioButton AdminBtn;
-
     @FXML
     private TextField EmailRegField;
-
     @FXML
     private PasswordField LogPassField;
-
     @FXML
     private Text LogRegTitle;
-
     @FXML
     private Button LoginLogBtn;
-
     @FXML
     private TextField LoginLogField;
-
     @FXML
     private PasswordField PswrdConfirmField;
-
     @FXML
     private TextField RegLogField;
-
     @FXML
     private PasswordField RegPassField;
-
     @FXML
     private Button RegisterBtn;
-
     @FXML
     private Text TglText;
-
     @FXML
     private Button ToggleButton;
-
-    @FXML
-    private RadioButton UserBtn;
-
     @FXML
     private Text statusMessage; // Для вывода сообщений об ошибках или успехе
 
@@ -86,7 +67,6 @@ public class LoginRegisterController {
             RegPassField.setVisible(true);
             PswrdConfirmField.setVisible(true);
             EmailRegField.setVisible(true);
-            UserBtn.setVisible(true);
             AdminBtn.setVisible(true);
         } else {
             ToggleButton.setText("Регистрация");
@@ -102,7 +82,6 @@ public class LoginRegisterController {
             RegPassField.setVisible(false);
             PswrdConfirmField.setVisible(false);
             EmailRegField.setVisible(false);
-            UserBtn.setVisible(false);
             AdminBtn.setVisible(false);
         }
         statusMessage.setText(""); // Очистить сообщение
@@ -140,14 +119,11 @@ public class LoginRegisterController {
 
     // Метод для регистрации
     @FXML
-    private void handleRegister(ActionEvent event) throws IOException {
+    private void handleRegister(ActionEvent event) {
         String login = RegLogField.getText().trim();
         String password = RegPassField.getText().trim();
         String confirmPassword = PswrdConfirmField.getText().trim();
         String email = EmailRegField.getText().trim();
-        Boolean isAdmin = false;
-        if (AdminBtn.isSelected()) isAdmin = true;
-        statusMessage.setVisible(true);
 
         if (login.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             statusMessage.setText("Пожалуйста, заполните все поля.");
@@ -168,7 +144,7 @@ public class LoginRegisterController {
             click(event);
             statusMessage.setText("Регистрация успешна! Теперь вы можете войти.");
             users.put(login, password);
-            User newUser = new User(login, email, isAdmin);
+            User newUser = new User(login, email);
         } else {
             statusMessage.setText("Ошибка при сохранении пользователя.");
         }
